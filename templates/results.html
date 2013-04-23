@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  	<link rel="stylesheet" type="text/css" href="\static\css\bootstrap.min.css"/> 
+
+  <title>Thermostat Controller</title>
+</head>
+
+<body>
+
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="/">Temperature</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/results">Results</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>  
+
+<div class="container">
+   
+   <br><br>
+   
+   <div class="row">
+      <div class="page-header">
+         <h1> Thermostat Results </h1> 
+      </div>
+   </div>
+      
+   <div id="results">  
+ 
+      <div class="row-fluid>
+         <div class="span12">
+            <table class="table table-hover">
+               <thead>
+                  <tr>
+                     <th>Date Time</th>
+                     <th>Indoor Temperature</th>
+                     <th>Outdoor Temperature</th>
+                     <th>Mode</th>
+                  </tr>
+               </thead>               
+               {% for p in posts %}
+                  <tr>
+                     <td>{{ p.datetime }}</td>
+                     <td>{{ p.indoor_temperature }}</td>
+                     <td>{{ p.outdoor_temperature }}</td>
+                     <td>{{ p.mode }}</td>
+                  <tr>
+               {% endfor %}
+            </table>  
+         </div>
+      </div>
+   </div>
+</body>
+
+</html>

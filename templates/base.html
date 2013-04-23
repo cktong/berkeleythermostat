@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  	<link rel="stylesheet" type="text/css" href="\static\css\bootstrap.min.css"/> 
+
+  <title>Thermostat Controller</title>
+</head>
+
+<body>
+
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="brand" href="/">Temperature</a>
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li><a href="/login">Login</a></li>
+                    <li><a href="/results">Results</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>  
+  
+  <div id="content">
+  {% block content %}
+  {% endblock %}
+  </div>
+</body>
+
+</html>
+
