@@ -17,7 +17,7 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 def blog_key(name = 'default'): #the data needs to have a parent in google datasore
     return db.Key.from_path('blogs', name)
         
-class Post(db.Model): # the db parameters
+class Grab(db.Model): # the db parameters
     datetime = db.DateTimeProperty(auto_now_add = True)
     user_id = db.IntegerProperty(required = True)
     indoor_temperature = db.FloatProperty(required = True)
@@ -26,7 +26,16 @@ class Post(db.Model): # the db parameters
     
     def render(self):
         #self._render_text = self.content.replace('\n', '<br>')
-        return render_str("results.html", p = self) #p=self is the **param       
+        return render_str("results.html", p = self) #p=self is the **param  
+
+class Users(db.Model): # to log users
+     user_id=db.IntegerProperty(required = True)
+     user_name=db.StringProperty(required = True)
+     user_password=db.StringProperty(required = True)
+     user_zip=db.IntegerProperty(required = True)
+
+class Preferences(db.Model): #logs preferences of temperatures
+     
 
 #---------------------------------------------------------------------------------------------------#             
                                
@@ -44,9 +53,7 @@ class WebHandler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
-class Login(WebHandler):
-    def get(self):
-        self.render("login.html")    
+ 
         
 #---------------------------------------------------------------------------------------------------#         
 
@@ -65,7 +72,7 @@ class MainHandler(webapp2.RequestHandler):
       #self.response.write('Mode: %s' % str(mode))
         
       if indoor_temperature and outdoor_temperature:
-         p = Post(parent = blog_key(), user_id=user_id, indoor_temperature = indoor_temperature, outdoor_temperature = outdoor_temperature, mode=mode)
+         p = Grab(parent = blog_key(), user_id=user_id, indoor_temperature = indoor_temperature, outdoor_temperature = outdoor_temperature, mode=mode)
          p.put()
          
          print p.indoor_temperature
@@ -74,7 +81,19 @@ class MainHandler(webapp2.RequestHandler):
       else:
          self.response.write('Error apending to db')
          
+class MakeUser(WebHandler):
+   def get(self):
+      #html for signup
+      # check to see if username is in user
+      # return user id
 
+class Login(WebHandler):
+   def get(self):
+      self.render("login.html")   
+   # username, password
+   # gql lookup of 
+   # return 
+         
 class GetTemperature(webapp2.RequestHandler):
    def get(self):
 
@@ -86,7 +105,7 @@ class GetTemperature(webapp2.RequestHandler):
       #self.response.write('Mode: %s' % str(mode))
         
       if indoor_temperature and outdoor_temperature:
-         p = Post(parent = blog_key(), user_id=user_id, indoor_temperature = indoor_temperature, outdoor_temperature = outdoor_temperature, mode=mode)
+         p = Grab(parent = blog_key(), user_id=user_id, indoor_temperature = indoor_temperature, outdoor_temperature = outdoor_temperature, mode=mode)
          p.put()
          
          print p.indoor_temperature
@@ -94,12 +113,13 @@ class GetTemperature(webapp2.RequestHandler):
          self.response.write('Success!')
       else:
          self.response.write('Error apending to db')
+
+
            
 class Results(WebHandler): #handler for /blog
-    def get(self):
-      posts = db.GqlQuery("select * from Post order by datetime desc")
+    def get(self): # need to pass in userid
+      posts = db.GqlQuery("select * from Grab order by datetime desc")
       #print posts.__class__.__name__
-     
       self.render('results.html',posts=posts)
            
         
