@@ -17,7 +17,7 @@ jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
 def blog_key(name = 'default'): #the data needs to have a parent in google datasore
     return db.Key.from_path('blogs', name)
         
-class Grab(db.Model): # the db parameters
+class Post(db.Model): # the db parameters
     datetime = db.DateTimeProperty(auto_now_add = True)
     user_id = db.IntegerProperty(required = True)
     indoor_temperature = db.FloatProperty(required = True)
@@ -26,16 +26,7 @@ class Grab(db.Model): # the db parameters
     
     def render(self):
         #self._render_text = self.content.replace('\n', '<br>')
-        return render_str("results.html", p = self) #p=self is the **param  
-
-class Users(db.Model): # to log users
-     user_id=db.IntegerProperty(required = True)
-     user_name=db.StringProperty(required = True)
-     user_password=db.StringProperty(required = True)
-     user_zip=db.IntegerProperty(required = True)
-
-class Preferences(db.Model): #logs preferences of temperatures
-     
+        return render_str("results.html", p = self) #p=self is the **param       
 
 #---------------------------------------------------------------------------------------------------#             
                                
@@ -53,7 +44,9 @@ class WebHandler(webapp2.RequestHandler):
     def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
 
- 
+class Login(WebHandler):
+    def get(self):
+        self.render("login.html")    
         
 #---------------------------------------------------------------------------------------------------#         
 
@@ -72,28 +65,16 @@ class MainHandler(webapp2.RequestHandler):
       #self.response.write('Mode: %s' % str(mode))
         
       if indoor_temperature and outdoor_temperature:
-         p = Grab(parent = blog_key(), user_id=user_id, indoor_temperature = indoor_temperature, outdoor_temperature = outdoor_temperature, mode=mode)
+         p = Post(parent = blog_key(), user_id=user_id, indoor_temperature = indoor_temperature, outdoor_temperature = outdoor_temperature, mode=mode)
          p.put()
          
-         print p.indoor_temperature
+         #print p.indoor_temperature
          #print p.mode
          self.response.write('Success!')
       else:
          self.response.write('Error apending to db')
          
-class MakeUser(WebHandler):
-   def get(self):
-      #html for signup
-      # check to see if username is in user
-      # return user id
 
-class Login(WebHandler):
-   def get(self):
-      self.render("login.html")   
-   # username, password
-   # gql lookup of 
-   # return 
-         
 class GetTemperature(webapp2.RequestHandler):
    def get(self):
 
@@ -105,7 +86,7 @@ class GetTemperature(webapp2.RequestHandler):
       #self.response.write('Mode: %s' % str(mode))
         
       if indoor_temperature and outdoor_temperature:
-         p = Grab(parent = blog_key(), user_id=user_id, indoor_temperature = indoor_temperature, outdoor_temperature = outdoor_temperature, mode=mode)
+         p = Post(parent = blog_key(), user_id=user_id, indoor_temperature = indoor_temperature, outdoor_temperature = outdoor_temperature, mode=mode)
          p.put()
          
          print p.indoor_temperature
@@ -113,18 +94,68 @@ class GetTemperature(webapp2.RequestHandler):
          self.response.write('Success!')
       else:
          self.response.write('Error apending to db')
-
-
            
 class Results(WebHandler): #handler for /blog
-    def get(self): # need to pass in userid
-      posts = db.GqlQuery("select * from Grab order by datetime desc")
+    def get(self):
+      posts = db.GqlQuery("select * from Post order by datetime desc")
       #print posts.__class__.__name__
+     
       self.render('results.html',posts=posts)
-           
+   
+#---------------------------------------------------------------------------------------------------#
+
+USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
+def valid_username(username):
+    return username and USER_RE.match(username)
+
+PASS_RE = re.compile(r"^.{3,20}$")
+def valid_password(password):
+    return password and PASS_RE.match(password)
+
+EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
+def valid_email(email):
+    return not email or EMAIL_RE.match(email)
+    
+class Signup(WebHandler):
+
+    def get(self):
+        self.render("signup-form.html")
         
+    def post(self):
+        have_error = False
+        username = self.request.get('username')
+        password = self.request.get('password')
+        verify = self.request.get('verify')
+        email = self.request.get('email')
+
+        params = dict(username = username,
+                      email = email)
+
+        if not valid_username(username):
+            params['error_username'] = "That's not a valid username."
+            have_error = True
+
+        if not valid_password(password):
+            params['error_password'] = "That wasn't a valid password."
+            have_error = True
+        elif password != verify:
+            params['error_verify'] = "Your passwords didn't match."
+            have_error = True
+
+        if not valid_email(email):
+            params['error_email'] = "That's not a valid email."
+            have_error = True
+
+        if have_error:
+            self.render('signup-form.html', **params)
+        else:
+            self.redirect('/results?username=' + username)     
+    
+
+           
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
+    ('/signup', Signup),
     ('/login', Login),
     ('/results', Results),
     ('/gettemperature', GetTemperature)
