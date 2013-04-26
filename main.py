@@ -7,6 +7,7 @@ import re
 from string import letters
 
 from google.appengine.ext import db
+from google.appengine.api import users
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates') #template_dir states that the templates will be in the template folder
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
@@ -28,6 +29,13 @@ class Post(db.Model): # the db parameters
         #self._render_text = self.content.replace('\n', '<br>')
         return render_str("results.html", p = self) #p=self is the **param       
 
+class Users(db.Model): # to log users
+     user_id=db.IntegerProperty(required = True)
+     user_name=db.StringProperty(required = True)
+     user_password=db.StringProperty(required = True)
+     user_ip=db.StringProperty(required = True)
+     user_zip=db.IntegerProperty(required = True)        
+        
 #---------------------------------------------------------------------------------------------------#             
                                
 def render_str(template, **params): # ** is because we dont know what parameter values would be needed in the template
@@ -102,7 +110,7 @@ class Results(WebHandler): #handler for /blog
      
       self.render('results.html',posts=posts)
    
-#---------------------------------------------------------------------------------------------------#
+#--------------------------------signup-------------------------------------------------------------#
 
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 def valid_username(username):
@@ -115,10 +123,15 @@ def valid_password(password):
 EMAIL_RE  = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 def valid_email(email):
     return not email or EMAIL_RE.match(email)
+
+ZIPCODE_RE = re.compile(r"^[0-9]{5}$")
+def valid_zipcode(zipcode):
+    return zipcode and ZIPCODE_RE.match(zipcode)
     
 class Signup(WebHandler):
 
     def get(self):
+        #users.create_login_url(dest_url='/results')
         self.render("signup-form.html")
         
     def post(self):
@@ -127,7 +140,9 @@ class Signup(WebHandler):
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
-
+        zipcode= self.request.get('zipcode')
+        ip=self.request.get('ip')
+         
         params = dict(username = username,
                       email = email)
 
@@ -145,13 +160,25 @@ class Signup(WebHandler):
         if not valid_email(email):
             params['error_email'] = "That's not a valid email."
             have_error = True
-
+            
+        if not valid_zipcode(zipcode):
+            params['error_zipcode'] = "That's not a valid zipcode."
+            have_error = True
+            
         if have_error:
             self.render('signup-form.html', **params)
         else:
+            user_id=db.IntegerProperty(required = True)
+            user_name=db.StringProperty(required = True)
+            user_password=db.StringProperty(required = True)
+            user_ip=db.StringProperty(required = True)
+            user_zip=db.IntegerProperty(required = True)       
+            
+            u=Users(parent=blog_key(), 
+            
             self.redirect('/results?username=' + username)     
     
-
+#---------------------------------------------------------------------------------------------------#
            
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
