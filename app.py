@@ -17,7 +17,7 @@ def get_indoor_temperature(IP):
    return temperature
 
 def get_outdoor_temperature(zip):
-   url= "http://api.wxbug.net/getLiveCompactWeatherRSS.aspx?ACode=A3452221584&zipcode=" + zip
+   url= "http://api.wxbug.net/getLiveCompactWeatherRSS.aspx?ACode=A3452221584&zipcode=" + str(zip)
    file = net.urlopen(url)   # file returned as a file like object
    data = file.read() # data is a str that has a XML type format
    #print data.__class__.__name__

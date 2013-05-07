@@ -1,4 +1,4 @@
 cron:
-- description: gets temperature readings ever 10 minutes
+- description: gets temperature readings ever 60 minutes
   url: /gettemperature
   schedule: every 60 minutes

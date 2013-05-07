@@ -41,17 +41,17 @@
                   <h1> Smart Thermostat <small>Login Page</small></h1>
                 </div>
                 
-               <form class="form-horizontal" method="POST" action="/home">
+               <form class="form-horizontal" method="POST" action="/login">
                   <div class="control-group">
-                     <label class="control-label" for="inputWOEID" >WOEID:</label>
+                     <label class="control-label" name="user_name" >Username:</label>
                      <div class="controls">
-                        <input id="inputWOEID" type="text" />
+                        <input name="user_name" type="text" />
                      </div>
                   </div>
                   <div class="control-group">
-                     <label class="control-label" for="inputIP" >IP Address:</label>
+                     <label class="control-label" name="user_password" >Password:</label>
                      <div class="controls">
-                        <input id="inputIP" type="text" />
+                        <input name="user_password" type="password" />
                      </div>
                   </div>
                   <div class="control-group">
