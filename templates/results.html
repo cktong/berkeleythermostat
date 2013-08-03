@@ -40,6 +40,7 @@
             <table class="table table-hover">
                <thead>
                   <tr>
+                     <th>User</th>
                      <th>Date Time</th>
                      <th>Indoor Temperature</th>
                      <th>Outdoor Temperature</th>
@@ -48,6 +49,7 @@
                </thead>               
                {% for p in posts %}
                   <tr>
+                     <td>{{ p.user_name }}</td>
                      <td>{{ p.datetime }}</td>
                      <td>{{ p.indoor_temperature }}</td>
                      <td>{{ p.outdoor_temperature }}</td>
